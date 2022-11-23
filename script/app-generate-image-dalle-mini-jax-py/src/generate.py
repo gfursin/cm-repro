@@ -4,6 +4,8 @@ print ('************************************************************************
 print ('*** START PYTHON CODE **********************************************************')
 print ('********************************************************************************')
 
+import os
+
 # Model references
 
 # dalle-mega
@@ -124,7 +126,11 @@ from tqdm.notebook import trange
 print(f"Prompts: {prompts}\n")
 # generate images
 images = []
-for i in trange(max(n_predictions // jax.device_count(), 1)):
+for i in range(0, max(n_predictions // jax.device_count(), 1)):
+    print ('')
+    print (i)
+    print ('')
+
     # get a new key
     key, subkey = jax.random.split(key)
     # generate images
@@ -144,9 +150,13 @@ for i in trange(max(n_predictions // jax.device_count(), 1)):
     decoded_images = decoded_images.clip(0.0, 1.0).reshape((-1, 256, 256, 3))
     for decoded_img in decoded_images:
         img = Image.fromarray(np.asarray(decoded_img * 255, dtype=np.uint8))
-        images.append(img)
-        display(img)
-        print()
+
+        file_name = 'generated-image-{}.jpg'.format(i)
+        img.save(file_name)
+
+        #images.append(img)
+        #display(img)
+        print('* Image {} saved in {}'.format(file_name, os.getcwd()))
 
 
 
