@@ -14,11 +14,27 @@ input_mapping:
 
 deps:
 - tags: detect,os
-- names:
+- tags: get,python3
+  names:
   - python
   - python3
-  tags: get,python3
 - tags: get,cuda
+  enable_if_env:
+    USE_GPU:
+    - yes
+- tags: get,generic-python-lib,_jax
+  skip_if_env:
+    USE_GPU:
+    - yes
+- tags: get,generic-python-lib,_jax_gpu
+  enable_if_env:
+    USE_GPU:
+    - yes
+
+variations:
+  gpu:
+    env:
+      USE_GPU: yes
 
 tags:
 - app
