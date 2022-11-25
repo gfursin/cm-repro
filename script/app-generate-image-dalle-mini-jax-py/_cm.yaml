@@ -6,12 +6,19 @@ automation_uid: 5b4e0237da074764
 
 category: Modular ML/AI applications
 
+default_env:
+  CM_NUMBER_OF_GENERATED_IMAGES: 1
+
+input_mapping:
+  num: CM_NUMBER_OF_GENERATED_IMAGES
+
 deps:
 - tags: detect,os
 - names:
   - python
   - python3
   tags: get,python3
+- tags: get,cuda
 
 tags:
 - app

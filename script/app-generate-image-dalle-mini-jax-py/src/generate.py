@@ -1,4 +1,4 @@
-# https://github.com/borisdayma/dalle-mini/blob/main/tools/inference/inference_pipeline.ipynb
+# From https://github.com/borisdayma/dalle-mini/blob/main/tools/inference/inference_pipeline.ipynb
 
 print ('********************************************************************************')
 print ('*** START PYTHON CODE **********************************************************')
@@ -94,9 +94,16 @@ processor = DalleBartProcessor.from_pretrained(DALLE_MODEL, revision=DALLE_COMMI
 
 
 
+print ('')
+text = os.environ.get('CM_INPUT','')
+if text == '':
+    text = input('Input text to generate image: ')
+text = text.strip()
+
 prompts = [
-    "sunset over a lake in the mountains",
-    "the Eiffel tower landing on the moon",
+#    "sunset over a lake in the mountains",
+#    "the Eiffel tower landing on the moon",
+   text.strip()
 ]
 
 
@@ -108,7 +115,7 @@ tokenized_prompt = replicate(tokenized_prompts)
 
 
 # number of predictions per prompt
-n_predictions = 8
+n_predictions = int(os.environ.get('CM_NUMBER_OF_GENERATED_IMAGES', '1'))
 
 # We can customize generation parameters (see https://huggingface.co/blog/how-to-generate)
 gen_top_k = None
@@ -123,12 +130,18 @@ import numpy as np
 from PIL import Image
 from tqdm.notebook import trange
 
+import time
+
 print(f"Prompts: {prompts}\n")
+
 # generate images
 images = []
+
 for i in range(0, max(n_predictions // jax.device_count(), 1)):
+    t1 = time.time()
+
     print ('')
-    print (i)
+    print ('Generating image: {}'.format(i+1))
     print ('')
 
     # get a new key
@@ -148,10 +161,14 @@ for i in range(0, max(n_predictions // jax.device_count(), 1)):
     # decode images
     decoded_images = p_decode(encoded_images, vqgan_params)
     decoded_images = decoded_images.clip(0.0, 1.0).reshape((-1, 256, 256, 3))
+
+    j=0
     for decoded_img in decoded_images:
+        j+=1
+
         img = Image.fromarray(np.asarray(decoded_img * 255, dtype=np.uint8))
 
-        file_name = 'generated-image-{}.jpg'.format(i)
+        file_name = 'generated-image-{}-{}.jpg'.format(i,j)
         img.save(file_name)
 
         #images.append(img)
@@ -159,7 +176,8 @@ for i in range(0, max(n_predictions // jax.device_count(), 1)):
         print('* Image {} saved in {}'.format(file_name, os.getcwd()))
 
 
-
+    print ('')
+    print ('Elapsed time: {}'.format(time.time()-t1))
 
 
 
